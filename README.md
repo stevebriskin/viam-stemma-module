@@ -9,11 +9,12 @@ The Stemma Soil Sensor (https://www.adafruit.com/product/4026)
 ### Configuration
 The following attribute template can be used to configure this model:
 
-```
+```json
 {
   "i2c_bus": string,
   "i2c_addr": int
 }
+```
 
 #### Attributes
 
