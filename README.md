@@ -11,8 +11,8 @@ The following attribute template can be used to configure this model:
 
 ```json
 {
-  "i2c_bus": string,
-  "i2c_addr": int
+  "i2c_bus": "string",
+  "i2c_addr": "int"
 }
 ```
 
