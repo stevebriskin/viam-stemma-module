@@ -16,7 +16,7 @@
   "entrypoint": "bin/stemma",
   "first_run": "",
   "build": {
-    "build": "make module.tar.gz",
+    "build": "make bin/module.tar.gz",
     "setup": "make setup",
     "path": "bin/module.tar.gz",
     "arch": [
