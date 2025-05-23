@@ -1,0 +1,27 @@
+{
+  "$schema": "https://dl.viam.dev/module.schema.json",
+  "module_id": "stevebriskin:stemma",
+  "visibility": "private",
+  "url": "https://github.com/stevebriskin/viam-stemma-module",
+  "description": "Adafruit Stemma components.",
+  "models": [
+    {
+      "api": "rdk:component:sensor",
+      "model": "stevebriskin:stemma:soil-sensor",
+      "short_description": "Adafruit Stemma Capacitative Soil Sensor (https://www.adafruit.com/product/4026)",
+      "markdown_link": "README.md#model-stevebriskinstemmasoil-sensor"
+    }
+  ],
+  "markdown_link": "README.md",
+  "entrypoint": "bin/stemma",
+  "first_run": "",
+  "build": {
+    "build": "make module.tar.gz",
+    "setup": "make setup",
+    "path": "bin/module.tar.gz",
+    "arch": [
+      "linux/amd64",
+      "linux/arm64"
+    ]
+  }
+}

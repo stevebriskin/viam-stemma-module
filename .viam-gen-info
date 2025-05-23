@@ -1,0 +1,13 @@
+{
+  "module_name": "stemma-soil-sensor",
+  "namespace": "stevebriskin",
+  "language": "go",
+  "resource_type": "component",
+  "resource_subtype": "sensor",
+  "model_name": "stemma-soil-sensor",
+  "enable_cloud_build": true,
+  "initialize_git": false,
+  "generator_version": "0.1.0",
+  "generated_on": "2025-05-15T21:13:40.900099Z",
+  "module_readme_link": "README.md"
+}
