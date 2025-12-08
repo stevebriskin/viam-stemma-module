@@ -8,7 +8,7 @@
     {
       "api": "rdk:component:sensor",
       "model": "stevebriskin:stemma:soil-sensor",
-      "short_description": "Adafruit Stemma Capacitative Soil Sensor (https://www.adafruit.com/product/4026)",
+      "short_description": "Adafruit Stemma I2C Capacitative Soil Sensor (https://www.adafruit.com/product/4026)",
       "markdown_link": "README.md#model-stevebriskinstemmasoil-sensor"
     }
   ],
