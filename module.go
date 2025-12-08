@@ -69,6 +69,7 @@ func newStemmaSoilSensorStemmaSoilSensor(ctx context.Context, deps resource.Depe
 }
 
 func NewStemmaSoilSensor(ctx context.Context, deps resource.Dependencies, name resource.Name, conf *Config, logger logging.Logger) (sensor.Sensor, error) {
+	// Note: the compiler will flag this as a missing function on non-linux systems.
 	i2cbus, err := buses.NewI2cBus(conf.I2CBus)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open i2c bus %s: %w",
