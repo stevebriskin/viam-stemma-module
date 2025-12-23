@@ -8,6 +8,8 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sync"
+	"time"
 
 	"go.viam.com/rdk/components/board/genericlinux/buses"
 	"go.viam.com/rdk/components/sensor"
@@ -203,6 +205,9 @@ type luxSensor struct {
 	gain        Gain
 	integration IntegrationTime
 	persistence Persistence
+
+	mu          sync.Mutex
+	lastReading time.Time
 }
 
 func newLuxSensor(ctx context.Context, deps resource.Dependencies, rawConf resource.Config, logger logging.Logger) (sensor.Sensor, error) {
@@ -260,6 +265,8 @@ func NewLuxSensor(ctx context.Context, deps resource.Dependencies, name resource
 		gain:        gain,
 		integration: integration,
 		persistence: persistence,
+		mu:          sync.Mutex{},
+		lastReading: time.Now(),
 	}
 
 	if err := s.Initialize(ctx); err != nil {
@@ -282,7 +289,7 @@ func (s *luxSensor) Initialize(ctx context.Context) error {
 
 	// Write configuration to ALS_CONF register (0x00)
 	conf := packConfig(true, false, s.persistence, s.integration, s.gain)
-	s.logger.Infof("Writing config to VEML7700: %016b", conf)
+	s.logger.Debugf("Writing config to VEML7700: %016b", conf)
 	if err := handle.WriteBlockData(ctx, ALS_CONFIG, []byte{byte(conf >> 8), byte(conf)}); err != nil {
 		return fmt.Errorf("failed to write config to VEML7700: %w", err)
 	}
@@ -290,6 +297,10 @@ func (s *luxSensor) Initialize(ctx context.Context) error {
 	if err := handle.WriteBlockData(ctx, ALS_POWER_SAVE, []byte{0x00, 0x00}); err != nil {
 		return fmt.Errorf("failed to write power save to VEML7700: %w", err)
 	}
+
+	time.Sleep(100 * time.Millisecond)
+	s.lastReading = time.Now()
+
 	return nil
 }
 
@@ -329,15 +340,15 @@ func (s *luxSensor) Readings(ctx context.Context, extra map[string]interface{}) 
 		return nil, err
 	}
 
-	lux := s.computeLux(ctx, als)
+	corrected, lux := s.computeLux(ctx, als)
 
 	// TODO: get other values and convert als to lux
-	return map[string]interface{}{"als": als, "lux": lux}, nil
+	return map[string]interface{}{"als": als, "lux": lux, "corrected": corrected}, nil
 
 }
 
 // Reference https://www.vishay.com/docs/84323/designingveml7700.pdf section "CALCULATING THE LUX LEVEL"
-func (s *luxSensor) computeLux(ctx context.Context, als uint16) float64 {
+func (s *luxSensor) computeLux(ctx context.Context, als uint16) (bool, float64) {
 	resolution := s.getResolution()
 	lux := resolution * float64(als)
 
@@ -354,10 +365,10 @@ func (s *luxSensor) computeLux(ctx context.Context, als uint16) float64 {
 			8.1488e-5*math.Pow(lux, 2) +
 			1.0023*lux
 
-		return correctedLux
+		return true, correctedLux
 	}
 
-	return lux
+	return false, lux
 }
 
 func (s *luxSensor) getResolution() float64 {
@@ -369,6 +380,30 @@ func (s *luxSensor) getResolution() float64 {
 }
 
 func (s *luxSensor) readALS(ctx context.Context) (uint16, error) {
+	// According to spec, the time between reads must be "For ALS_IT = 100 ms this is about 600 ms. For 200 ms it will be 700 ms, for
+	// 400 ms it will be 900 ms, and for 800 ms it will be 1300 ms." This assumes power save mode 1 (00).
+
+	var minReadInterval time.Duration
+	switch s.integration {
+	case IT_100MS:
+		minReadInterval = 600 * time.Millisecond
+	case IT_200MS:
+		minReadInterval = 700 * time.Millisecond
+	case IT_400MS:
+		minReadInterval = 900 * time.Millisecond
+	case IT_800MS:
+		minReadInterval = 1300 * time.Millisecond
+	default:
+		minReadInterval = 0
+	}
+	timeSinceLastReading := time.Since(s.lastReading)
+	if timeSinceLastReading < minReadInterval {
+		time.Sleep(minReadInterval - timeSinceLastReading)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	handle, err := s.bus.OpenHandle(s.addr)
 	if err != nil {
 		return 0, err
@@ -379,9 +414,10 @@ func (s *luxSensor) readALS(ctx context.Context) (uint16, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to read from stemma while reading ALS data: %w", err)
 	}
+	s.lastReading = time.Now()
 
 	// VEML7700 returns data in little-endian (LSB first) order.
-	s.logger.Infof("Read ALS data from VEML7700. MSB: %02x, LSB: %02x, value: %04x", data[1], data[0], uint16(data[1])<<8|uint16(data[0]))
+	s.logger.Debugf("Read ALS data from VEML7700. MSB: %02x, LSB: %02x, value: %04x", data[1], data[0], uint16(data[1])<<8|uint16(data[0]))
 	return uint16(data[1])<<8 | uint16(data[0]), nil
 }
 

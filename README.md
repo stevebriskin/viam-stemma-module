@@ -100,3 +100,4 @@ The `Readings` method returns the raw als readings and computed lux.
 |-----------------|---------|-------------------------------------------------|
 | `als` | int   | Raw ALS reading from the sensor. |
 | `lux`      | float     | Computed lux value, with a correction factor applied if needed   |
+| `corrected` | boolean | Whether the lux reading is corrected |
