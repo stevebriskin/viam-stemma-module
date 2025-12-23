@@ -10,6 +10,12 @@
       "model": "stevebriskin:stemma:soil-sensor",
       "short_description": "Adafruit Stemma I2C Capacitative Soil Sensor (https://www.adafruit.com/product/4026)",
       "markdown_link": "README.md#model-stevebriskinstemmasoil-sensor"
+    },
+    {
+      "api": "rdk:component:sensor",
+      "model": "stevebriskin:stemma:lux-sensor",
+      "short_description": "Adafruit Stemma VEML7700 Light/Lux Sensor (https://www.adafruit.com/product/4162)",
+      "markdown_link": "README.md#model-stevebriskinstemmalux-sensor"
     }
   ],
   "markdown_link": "README.md",

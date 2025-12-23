@@ -2,7 +2,7 @@
 // https://github.com/adafruit/Adafruit_Seesaw/blob/master/Adafruit_seesaw.cpp was used as the reference implementation.
 // Product: https://www.adafruit.com/product/4026
 
-package stemmasoilsensor
+package soilsensor
 
 import (
 	"context"

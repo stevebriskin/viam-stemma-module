@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"stemmasoilsensor"
+	"soilsensor"
+
+	"go.viam.com/rdk/components/sensor"
 	"go.viam.com/rdk/logging"
 	"go.viam.com/rdk/resource"
-	"go.viam.com/rdk/components/sensor"
 )
 
 func main() {
@@ -22,9 +23,9 @@ func realMain() error {
 	deps := resource.Dependencies{}
 	// can load these from a remote machine if you need
 
-	cfg := stemmasoilsensor.Config{}
+	cfg := soilsensor.Config{}
 
-	thing, err := stemmasoilsensor.NewStemmaSoilSensor(ctx, deps, sensor.Named("foo"), &cfg, logger)
+	thing, err := soilsensor.NewStemmaSoilSensor(ctx, deps, sensor.Named("foo"), &cfg, logger)
 	if err != nil {
 		return err
 	}
